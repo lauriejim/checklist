@@ -1,0 +1,61 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="../../assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../assets/fontawesome/css/all.css">
+  </head>
+  <body>
+    <div class="container-fluidv p-0">
+      <ul class="list-group list-group-flush"></ul>
+
+      <div style="height:69px"></div>
+
+      <div class="row fixed-bottom">
+        <div class="col-12">
+          <div class="input-group">
+            <div class="input-group-append">
+              <button class="btn btn-outline-primary rounded-0 border-left-0 border-right-0 border-bottom-0" type="button" action="edit">Edit</button>
+            </div>
+            <input type="text" class="form-control rounded-0 border-right-0 border-left-0 border-bottom-0 border-primary" placeholder="Task name">
+            <div class="input-group-append">
+              <button class="btn btn-outline-primary rounded-0 border-left-0 border-right-0 border-bottom-0" type="button" action="add">Add</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-12">
+          <button type="button" class="btn btn-primary btn-sm btn-block rounded-0" action="save">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" tabindex="-1" role="dialog" modal="name">
+      <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+          <div class="modal-body text-center font-weight-bold">
+            <div class="row">
+              <div class="col-12">
+                <input type="text" class="form-control border-primary rounded-0" placeholder="Checklist name">
+              </div>
+              <div class="col-12">
+                <button type="button" class="btn btn-primary btn-sm btn-block rounded-0" action="continue">Continue</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" tabindex="-1" role="dialog" modal="save">
+      <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+          <div class="modal-body text-center font-weight-bold">
+            <span>Checklist complete</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>window.$ = window.jQuery = require('jquery')</script>
+    <script type="text/javascript" src="../../assets/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="./index.js"></script>
+  </body>
+</html>

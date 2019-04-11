@@ -1,0 +1,19 @@
+{
+  "name": "ckecklist",
+  "version": "1.0.0",
+  "description": "Checklist application",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-packager . Checklist --out ./build --platform darwin --arch x64 --overwrite --icon ./assets/images/logo.icns"
+  },
+  "devDependencies": {
+    "electron": "^4.1.1",
+    "electron-packager": "^13.1.1"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "configstore": "^4.0.0",
+    "jquery": "^3.3.1"
+  }
+}
