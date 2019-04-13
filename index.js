@@ -4,8 +4,6 @@ const configstore = require('configstore')
 
 const path = require('path')
 
-const Notification = require('./lib/Notifications')
-
 const iconPath = path.resolve(__dirname, 'assets', 'images', 'icon@1x.png')
 
 let appIcon = null
@@ -14,14 +12,49 @@ const Storage = new configstore('checklists', {
   checklists: []
 })
 
-app.dock.hide()
-
 app.on('ready', () => {
   appIcon = new Tray(iconPath)
 
   const checklists = Storage.get('checklists')
 
-  const buildMenu = () => {
+  const menu = Menu.buildFromTemplate([{
+    label: app.getName(),
+    submenu: [
+      {role: 'about'},
+      {role: 'quit'}
+    ]
+  }, {
+    label: 'Edit',
+    submenu: [
+      {role: 'undo'},
+      {role: 'redo'},
+      {type: 'separator'},
+      {role: 'cut'},
+      {role: 'copy'},
+      {role: 'paste'},
+      {role: 'pasteandmatchstyle'},
+      {role: 'delete'},
+      {role: 'selectall'}
+    ]
+  },
+  {
+    label: 'View',
+    submenu: [
+      {role: 'reload'},
+      {role: 'forcereload'},
+      {role: 'toggledevtools'},
+      {type: 'separator'},
+      {role: 'resetzoom'},
+      {role: 'zoomin'},
+      {role: 'zoomout'},
+      {type: 'separator'},
+      {role: 'togglefullscreen'}
+    ]
+  }])
+
+  Menu.setApplicationMenu(menu)
+
+  const buildContextMenu = () => {
     const menu = checklists.map((checklist) => {
       return {
         label: checklist.name,
@@ -62,34 +95,26 @@ app.on('ready', () => {
     appIcon.setContextMenu(contextMenu)
   }
 
-  const mainWindow = new BrowserWindow({ show: false })
+  const mainWindow = new BrowserWindow({
+    title: '📝 Checklist',
+    titleBarStyle: 'hidden',
+    minimizable: false,
+    maximizable: false,
+    height: 300,
+    width: 500
+  })
 
-  let WINDOWS_OPEN = 0
+  mainWindow.loadFile(path.resolve(__dirname, 'views', 'Home', 'index.html'))
 
-  buildMenu()
-
-  const dock = {
-    show: () => {
-      if (!WINDOWS_OPEN) {
-        app.dock.show()
-      }
-
-      WINDOWS_OPEN += 1
-    },
-    hide: () => {
-      WINDOWS_OPEN -= 1
-
-      if (!WINDOWS_OPEN) {
-        app.dock.hide()
-      }
-    }
-  }
+  buildContextMenu()
 
   const displayChecklist = (checklist) => {
     const height = checklist.data.length * 49 + 21
 
     let checklistWindow = new BrowserWindow({
       title: `${checklist.name} checklist`,
+      minimizable: false,
+      maximizable: false,
       width: 400,
       height,
       resizable: false,
@@ -98,19 +123,18 @@ app.on('ready', () => {
 
     checklistWindow.loadFile(path.resolve(__dirname, 'views', 'Checklist', 'index.html'))
 
-    dock.show()
-
     checklistWindow.checklist = checklist
 
     checklistWindow.on('closed', function (e) {
       checklistWindow = null
-      dock.hide()
     })
   }
 
   displayEditChecklist = (checklist) => {
     let checklistWindow = new BrowserWindow({
       title: checklist ? `Edit ${checklist.name} checklit` : 'Create checklist',
+      minimizable: false,
+      maximizable: false,
       width: 500,
       resizable: false,
       parent: mainWindow
@@ -118,13 +142,10 @@ app.on('ready', () => {
 
     checklistWindow.loadFile(path.resolve(__dirname, 'views', 'Edit', 'index.html'))
 
-    dock.show()
-
     checklistWindow.checklist = checklist
 
     checklistWindow.on('closed', function (e) {
       checklistWindow = null
-      dock.hide()
     })
   }
 
@@ -143,7 +164,7 @@ app.on('ready', () => {
 
     Storage.set('checklists', checklists)
 
-    buildMenu()
+    buildContextMenu()
   }
 
   const deleteChecklist = (checklist) => {
@@ -151,11 +172,22 @@ app.on('ready', () => {
       return JSON.stringify(loopChecklist) === JSON.stringify(checklist)
     })
 
+    const confirm = dialog.showMessageBox({
+      type: 'info',
+      buttons: ['Cancel', 'Confirm'],
+      message: 'Confirm deletion',
+      detail: `${checklists[index].name} checklist`
+    })
+
+    if (!confirm) {
+      return
+    }
+
     checklists.splice(index, 1)
 
     Storage.set('checklists', checklists)
 
-    buildMenu()
+    buildContextMenu()
   }
 
   ipcMain.on('checklist:edit', (e, checklists) => {
