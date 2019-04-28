@@ -95,8 +95,8 @@ app.on('ready', () => {
     appIcon.setContextMenu(contextMenu)
   }
 
-  const mainWindow = new BrowserWindow({
-    title: '📝 Checklist',
+  const homeWindow = new BrowserWindow({
+    title: '📋 Checklist',
     titleBarStyle: 'hidden',
     minimizable: false,
     maximizable: false,
@@ -104,7 +104,7 @@ app.on('ready', () => {
     width: 500
   })
 
-  mainWindow.loadFile(path.resolve(__dirname, 'views', 'Home', 'index.html'))
+  homeWindow.loadFile(path.resolve(__dirname, 'views', 'Home', 'index.html'))
 
   buildContextMenu()
 
@@ -117,8 +117,7 @@ app.on('ready', () => {
       maximizable: false,
       width: 400,
       height,
-      resizable: false,
-      parent: mainWindow
+      resizable: false
     })
 
     checklistWindow.loadFile(path.resolve(__dirname, 'views', 'Checklist', 'index.html'))
@@ -136,8 +135,8 @@ app.on('ready', () => {
       minimizable: false,
       maximizable: false,
       width: 500,
-      resizable: false,
-      parent: mainWindow
+      height: 49 + 21 + 69,
+      resizable: false
     })
 
     checklistWindow.loadFile(path.resolve(__dirname, 'views', 'Edit', 'index.html'))
@@ -193,4 +192,27 @@ app.on('ready', () => {
   ipcMain.on('checklist:edit', (e, checklists) => {
     editChecklist(checklists)
   })
+
+  setInterval(() => {
+    const now = new Date()
+
+    const zeroPrefix = (value) => {
+      return value < 10 ? `0${value}` : value
+    }
+
+    const hours = zeroPrefix(now.getHours())
+    const minutes = zeroPrefix(now.getMinutes())
+
+    checklistToOpen = checklists.filter(checklist => {
+      if (!checklist.scheduled) {
+        return
+      }
+
+      return checklist.scheduled === `${hours}:${minutes}`
+    })
+
+    checklistToOpen.forEach((checklist) => {
+      displayChecklist(checklist)
+    })
+  }, 60 * 1000);
 })

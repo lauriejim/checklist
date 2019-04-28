@@ -1,4 +1,6 @@
 (async () => {
+  const path = require('path')
+
   const {remote, ipcRenderer} = require('electron')
 
   const window = remote.getCurrentWindow()
@@ -11,6 +13,7 @@
 
   const checklist = JSON.parse(JSON.stringify(window.checklist || {
     name: '',
+    sheduled: false,
     data: []
   }))
 
@@ -143,28 +146,47 @@
     }
   })
 
-  $continue.on('click', () => {
-    const name = $inputChecklit.val().trim()
+  let configWindow = null
 
-    if (name === '') {
-      $inputChecklit.select()
-
+  $edit.on('click', () => {
+    if (configWindow) {
+      configWindow.focus()
       return
     }
 
-    checklist.name = name
+    const BrowserWindow = remote.BrowserWindow
 
-    window.setTitle(`${beforeChecklist ? 'Update' : 'Create'} ${checklist.name} checklist`)
+    configWindow = new BrowserWindow({
+      title: `${checklist.name} configuration`,
+      minimizable: false,
+      maximizable: false,
+      height: 250,
+      width: 500,
+      modal: true,
+      parent: window,
+      checklist
+    })
 
-    $modalName.modal('hide')
+    configWindow.loadFile(path.resolve(__dirname, '..', 'config', 'index.html'))
 
-    $inputTask.select()
-  })
+    configWindow.webContents.on('did-finish-load', () => {
+      configWindow.webContents.send('checklist:load', {
+        checklist
+      })
+    })
 
-  $edit.on('click', () => {
-    $modalName.modal('show')
+    configWindow.webContents.on('ipc-message', (event, [channel, args]) => {
+      if (channel === 'checklist:config') {
+        checklist.name = args.checklist.name
+        checklist.scheduled = args.checklist.scheduled
 
-    $inputChecklit.select()
+        window.setTitle(checklist.name)
+      }
+    })
+
+    configWindow.on('closed', function (e) {
+      configWindow = null
+    })
   })
 
   $save.on('click', () => {
