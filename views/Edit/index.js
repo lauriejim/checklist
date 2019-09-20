@@ -17,6 +17,8 @@
     data: []
   }))
 
+  let initSize = false;
+
   const $ul = $('ul')
 
   const $inputTask = $('.input-group input')
@@ -45,6 +47,14 @@
 
   const resize = () => {
     const newHeigth = height()
+
+    if (newHeigth > 500 && !initSize) {
+      window.setSize(width, 500)
+    }
+
+    if (!initSize) {
+      initSize = true;
+    }
 
     if (newHeigth > 500) {
       scrollBottom()
